@@ -65,7 +65,13 @@ def format_output(message: str, system_info: Dict[str, Any]) -> Panel:
     )
 
 
-@click.command()
+@click.group()
+def app():
+    """A boilerplate CLI application demonstrating modern Python tooling."""
+    pass
+
+
+@app.command()
 @click.option(
     "--message",
     default="Hello, World!",
@@ -78,11 +84,11 @@ def format_output(message: str, system_info: Dict[str, Any]) -> Panel:
     is_flag=True,
     help="Output parsable JSON instead of formatted output"
 )
-def app(message: str, json_output: bool) -> None:
+def run(message: str, json_output: bool) -> None:
     """
-    A boilerplate CLI application demonstrating modern Python tooling.
-
-    This application showcases:
+    Run the boilerplate application with system information.
+    
+    This command showcases:
     - Click for CLI interface
     - Rich for terminal formatting
     - sh library for subprocess calls
@@ -108,6 +114,39 @@ def app(message: str, json_output: bool) -> None:
     except Exception as e:
         console.print(f"Unexpected error: {e}", style="red")
         raise click.ClickException(f"Unexpected error: {e}")
+
+
+@app.command()
+def demo_duckdb():
+    """Demonstrate DuckDB functionality with sample queries."""
+    from boilerplate_app.duckdb_example import example_queries
+    console.print("[bold cyan]DuckDB Example:[/bold cyan]\n")
+    example_queries()
+
+
+@app.command()
+def demo_polars():
+    """Demonstrate Polars functionality with DataFrame operations."""
+    from boilerplate_app.polars_example import example_dataframe_operations, example_data_transformation
+    console.print("[bold cyan]Polars Example:[/bold cyan]\n")
+    example_dataframe_operations()
+    example_data_transformation()
+
+
+@app.command()
+def demo_cattrs():
+    """Demonstrate cattrs functionality with dataclass serialization."""
+    from boilerplate_app.cattrs_example import (
+        example_basic_serialization,
+        example_list_serialization,
+        example_nested_dataclasses,
+        example_json_serialization
+    )
+    console.print("[bold cyan]Cattrs Example:[/bold cyan]\n")
+    example_basic_serialization()
+    example_list_serialization()
+    example_nested_dataclasses()
+    example_json_serialization()
 
 
 if __name__ == "__main__":

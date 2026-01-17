@@ -51,7 +51,7 @@ echo "Python location: $(which python)"
 echo "UV location: $(which uv)"
 
 # Test dependencies (should work)
-uv run python -c "import click, sh, rich; print('✅ All dependencies available')"
+uv run python -c "import click, sh, rich, duckdb, polars, cattrs; print('✅ All dependencies available')"
 
 # Test the application
 uv run boilerplate-cli --help
@@ -61,19 +61,23 @@ uv run boilerplate-cli --help
 
 ```
 .
-├── boilerplate_app/     # Python application directory
+├── boilerplate_app/        # Python application directory
 │   ├── __init__.py
-│   └── cli.py        # Main CLI application
-├── justfile          # Just task runner recipes
-├── devenv.nix        # Development environment configuration
-├── devenv.yaml       # Alternative devenv configuration
-├── pyproject.toml    # Python package configuration
-├── uv.lock           # UV dependency lockfile
-├── devenv.lock       # Devenv environment lockfile
-├── .envrc            # Environment variables
-├── AGENTS.md         # AI assistant configuration
-├── README.md         # User documentation
-└── DEV.md            # This developer guide
+│   ├── cli.py              # Main CLI application with command group
+│   ├── cattrs_example.py   # Cattrs serialization examples
+│   ├── duckdb_example.py   # DuckDB query examples
+│   └── polars_example.py   # Polars DataFrame examples
+├── justfile                # Just task runner recipes
+├── devenv.nix              # Development environment configuration
+├── devenv.yaml             # Devenv inputs configuration
+├── pyproject.toml          # Python package configuration
+├── uv.lock                 # UV dependency lockfile
+├── devenv.lock             # Devenv environment lockfile
+├── .envrc                  # Direnv configuration
+├── .gitignore              # Git ignore rules
+├── AGENTS.md               # AI assistant configuration
+├── README.md               # User documentation
+└── DEV.md                  # This developer guide
 ```
 
 ## Code Architecture
@@ -81,7 +85,7 @@ uv run boilerplate-cli --help
 ### Main Components
 
 1. **CLI Interface** (`boilerplate_app/cli.py`)
-     - Click command decorators for CLI options
+     - Click command group with subcommands (`run`, `demo-duckdb`, `demo-polars`, `demo-cattrs`)
      - Main entry point and argument parsing
      - Output formatting logic
      - Error handling with custom AppError exception
@@ -96,7 +100,12 @@ uv run boilerplate-cli --help
      - JSON output: Machine-parseable JSON strings
      - Debug output to stderr
 
-4. **Environment Management**
+4. **Data Processing Examples**
+     - `duckdb_example.py`: In-memory SQL queries with DuckDB
+     - `polars_example.py`: DataFrame operations with Polars
+     - `cattrs_example.py`: Dataclass serialization/deserialization
+
+5. **Environment Management**
      - Nix/devenv for reproducible development
      - UV for Python dependency management
      - Justfile for task automation
@@ -105,7 +114,11 @@ uv run boilerplate-cli --help
 
 - `get_system_info()`: Gathers system information using sh library
 - `format_output(message, system_info)`: Formats output with Rich panels
-- `app()`: Main CLI command handler
+- `app()`: Click command group handler
+- `run()`: Main CLI run command
+- `demo_duckdb()`: DuckDB demonstration command
+- `demo_polars()`: Polars demonstration command
+- `demo_cattrs()`: Cattrs demonstration command
 - `AppError`: Custom exception for application errors
 
 ### Technical Implementation
@@ -149,11 +162,16 @@ just run                    # Default command
 just run-custom             # Custom message
 just run-json               # JSON output
 
+# Test demo commands
+just demo-duckdb            # DuckDB demonstration
+just demo-polars            # Polars demonstration
+just demo-cattrs            # Cattrs demonstration
+
 # Test error handling
-uv run boilerplate-cli --message "test"
+uv run boilerplate-cli run --message "test"
 
 # Verify environment
-uv run python -c "import click, sh, rich; print('✅ All dependencies available')"
+uv run python -c "import click, sh, rich, duckdb, polars, cattrs; print('✅ All dependencies available')"
 
 # Build package
 uv build
@@ -176,6 +194,9 @@ All dependencies are managed by `devenv` and defined in `devenv.nix` and `pyproj
 - **Click**: CLI framework
 - **Rich**: Terminal formatting and colorization
 - **sh**: subprocess wrapper
+- **DuckDB**: In-memory SQL database
+- **Polars**: Fast DataFrame library
+- **cattrs**: Dataclass serialization/deserialization
 - **uv**: Python package manager
 - **hatchling**: Build backend
 
@@ -225,7 +246,7 @@ pip show boilerplate-cli
     which uv     # Should show devenv's uv
     
     # Test dependencies
-    uv run python -c "import click, sh, rich; print('Dependencies OK')"
+    uv run python -c "import click, sh, rich, duckdb, polars, cattrs; print('Dependencies OK')"
     ```
 
 2. **Missing Dependencies**: devenv should handle all dependencies automatically

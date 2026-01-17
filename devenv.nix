@@ -19,11 +19,23 @@ in
   # https://devenv.sh/packages/
   packages = [
     zshell
+    # general dev tools
     pkgs.git 
     pkgs.difftastic
     pkgs.opencode
     pkgs.zellij
     pkgs.starship
+
+    # data tools
+    pkgs.nushell
+    pkgs.duckdb
+
+    # python dev tools
+    pkgs.python3Packages.python-lsp-server
+    pkgs.python3Packages.jedi-language-server
+    pkgs.python3Packages.ruff
+    pkgs.ty
+
   ];
 
   # https://devenv.sh/languages/
