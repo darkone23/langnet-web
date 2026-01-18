@@ -1,6 +1,6 @@
 # Frontend
 
-Vite-powered frontend with TypeScript, Tailwind CSS, DaisyUI, HTMX, and Surreal.js.
+Vite-powered frontend with TypeScript, Tailwind CSS, DaisyUI, HTMX, and Alpine.js.
 
 ## Structure
 
@@ -45,14 +45,14 @@ bun run dev
 
 ## Tech Stack
 
-| Technology | Purpose |
-|------------|---------|
-| Vite | Build tool and dev server |
-| TypeScript | Type-safe JavaScript |
-| Tailwind CSS v4 | Utility-first CSS |
-| DaisyUI v5 | Component library for Tailwind |
-| HTMX | Server-driven interactivity |
-| Surreal.js | Locality of behavior |
+ | Technology | Purpose |
+ |------------|---------|
+ | Vite | Build tool and dev server |
+ | TypeScript | Type-safe JavaScript |
+ | Tailwind CSS v4 | Utility-first CSS |
+ | DaisyUI v5 | Component library for Tailwind |
+ | HTMX | Server-driven interactivity |
+  | Alpine.js | Reactive framework |
 
 ## Styling
 
@@ -94,7 +94,7 @@ Output is placed in `dist/` which Flask serves in production mode.
 
 **Runtime:**
 - `htmx.org`: Server-driven UI
-- `surreal.js`: Locality of behavior
+- `alpinejs`: Reactive framework
 
 **Development:**
 - `vite`: Build tool

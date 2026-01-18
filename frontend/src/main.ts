@@ -1,37 +1,26 @@
 import './tailwind.css'
-import 'htmx.org'
+import htmx from 'htmx.org'
+import Alpine from 'alpinejs';
 
-document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
-  <div class="min-h-screen bg-base-200">
-    <div class="navbar bg-base-100 shadow-lg">
-      <div class="flex-1">
-        <a class="btn btn-ghost text-xl">OpenCode Boilerplate Web</a>
-      </div>
-      <div class="flex-none">
-        <button class="btn btn-square btn-ghost">
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="inline-block w-5 h-5 stroke-current">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
-          </svg>
-        </button>
-      </div>
-    </div>
-    
-    <div class="hero bg-base-200 min-h-[calc(100vh-64px)]">
-      <div class="hero-content text-center">
-        <div class="max-w-md">
-          <h1 class="text-5xl font-bold">Welcome</h1>
-          <p class="py-6">
-            This project uses Vite + Tailwind + DaisyUI + HTMX + Surreal.js for a modern web development experience.
-          </p>
-          <div class="join">
-            <button class="btn btn-primary join-item">Get Started</button>
-            <button class="btn btn-secondary join-item" hx-get="/api/hello-htmx" hx-target="#response">
-              Test HTMX
-            </button>
-          </div>
-          <div id="response" class="mt-4"></div>
-        </div>
-      </div>
-    </div>
-  </div>
-`
+// Setup Alpine
+
+declare global {
+  interface Window {
+      htmx: typeof htmx;
+      Alpine: typeof Alpine;
+  }
+}
+
+window.htmx = htmx
+window.Alpine = Alpine;
+
+Alpine.start();
+
+document.addEventListener('DOMContentLoaded', () => {
+    const app = document.querySelector<HTMLDivElement>('#app')
+    if (app) {
+        app.setAttribute('hx-get', '/api/main-content')
+        app.setAttribute('hx-trigger', 'load')
+        htmx.process(app) // Explicitly tell HTMX to look at this node
+    }
+})

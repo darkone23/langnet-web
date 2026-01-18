@@ -7,7 +7,7 @@ dev:
 
 # Development: Start frontend (Vite)
 dev-frontend:
-    @cd frontend && bun run dev
+    @just -f ./frontend/justfile dev
 
 # Development: Start backend (Flask)
 dev-backend:

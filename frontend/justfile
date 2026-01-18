@@ -7,7 +7,7 @@ install:
 
 # Start Vite dev server
 dev:
-    bun run dev
+    bun run dev --host 0.0.0.0
 
 # Build for production
 build:

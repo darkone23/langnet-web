@@ -1,4 +1,4 @@
-from flask import Blueprint, jsonify, request
+from flask import Blueprint, jsonify, request, render_template
 
 api = Blueprint('api', __name__)
 
@@ -24,3 +24,8 @@ def hello_htmx():
         <span>Hello from Flask API via HTMX!</span>
     </div>
     '''
+
+@api.route('/main-content', methods=['GET'])
+def main_content():
+    """Returns the main HTML content as a partial"""
+    return render_template('main_content.html')

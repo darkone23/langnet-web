@@ -10,7 +10,7 @@ Terminal first for taking advantage of agent workflows like `opencode`.
 - Modern build tooling with Vite
 - Styling with Tailwind CSS v4 + DaisyUI v5
 - HTMX for server-driven interactivity
-- Surreal.js for locality of behavior
+- Alpine.js for client-side interactivity
 - TypeScript support
 - Hot module replacement in development
 
@@ -117,19 +117,26 @@ just demo-cattrs      # Cattrs serialization examples
 ├─────────────────────────────────────────────────────────────┤
 │  Browser ──► Vite (43210) ──► Flask API (43280)             │
 │              │                    │                          │
-│              ├─ Hot reload        ├─ /api/* routes           │
-│              ├─ Tailwind/DaisyUI  ├─ JSON responses          │
-│              └─ HTMX/Surreal.js   └─ HTML partials           │
+│              ├─ Serves index.html  ├─ /api/main-content     │
+│              ├─ Injects script    │   (renders Jinja2)      │
+│              ├─ Hot reload        ├─ /api/hello-htmx        │
+│              ├─ Tailwind/DaisyUI  │   (returns HTML)        │
+│              └─ HTMX/Alpine.js    └─ /api/hello (JSON)      │
 └─────────────────────────────────────────────────────────────┘
-
 ┌─────────────────────────────────────────────────────────────┐
 │                     Production Mode                          │
 ├─────────────────────────────────────────────────────────────┤
 │  Browser ──► Gunicorn (43280)                                │
 │                  │                                           │
-│                  ├─ Serves built frontend from dist/         │
-│                  └─ /api/* routes                            │
+│                  ├─ Serves built frontend/dist/index.html    │
+│                  ├─ Serves built frontend/dist/assets/*      │
+│                  └─ /api/* routes (renders Jinja2 partials)  │
 └─────────────────────────────────────────────────────────────┘
+
+Tailwind v4 scans:
+  - frontend/src/* (TypeScript/CSS)
+  - frontend/index.html (Vite entry point)
+  - backend/boilerplate_app/web/templates/* (Jinja2/HTMX partials)
 ```
 
 ### Tech Stack
@@ -138,8 +145,8 @@ just demo-cattrs      # Cattrs serialization examples
 |-------|------------|---------|
 | Frontend Build | Vite | Fast dev server, optimized builds |
 | Styling | Tailwind CSS + DaisyUI | Utility-first CSS with components |
-| Interactivity | HTMX | Server-driven UI updates |
-| Behavior | Surreal.js | Locality of behavior patterns |
+| Server UI Updates | HTMX | Server-driven UI updates |
+| Client Behavior | Alpine.js | Client-side behavior |
 | Backend | Flask | Python web framework |
 | WSGI | Gunicorn | Production server |
 | CLI | Click + Rich | Command-line interface |

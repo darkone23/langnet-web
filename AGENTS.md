@@ -4,7 +4,7 @@
 Full-stack web application with Vite frontend and Flask backend. Nix/devenv-based development environment with reproducible builds. Configuration is declarative via Nix expressions.
 
 ## Tech Stack
-- **Frontend**: Vite + TypeScript + Tailwind CSS v4 + DaisyUI v5 + HTMX + Surreal.js
+- **Frontend**: Vite + TypeScript + Tailwind CSS v4 + DaisyUI v5 + HTMX + Alpine.js
 - **Backend**: Flask + Blueprint routes + Jinja2 + Gunicorn
 - **CLI**: Click + Rich + sh libraries
 - **Data**: Polars + DuckDB + cattrs

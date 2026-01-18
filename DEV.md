@@ -6,7 +6,7 @@ This document provides instructions for developers working on this full-stack we
 
 This is a fully functional full-stack web application template with the following characteristics:
 
-- **Frontend**: Vite + TypeScript + Tailwind CSS + DaisyUI + HTMX + Surreal.js
+- **Frontend**: Vite + TypeScript + Tailwind CSS + DaisyUI + HTMX + Alpine.js
 - **Backend**: Flask + Blueprint routes + Jinja2 + Gunicorn
 - **CLI**: Click + Rich + sh libraries
 - **Data Processing**: Polars + DuckDB + cattrs
@@ -68,7 +68,6 @@ cd frontend && bun run build && cd ..
 │   ├── index.html             # HTML entry point
 │   ├── vite.config.ts         # Vite configuration
 │   ├── tsconfig.json          # TypeScript configuration
-│   ├── postcss.config.js      # PostCSS configuration
 │   ├── package.json           # Frontend dependencies
 │   ├── bun.lock               # Bun lockfile
 │   └── justfile               # Frontend commands
@@ -77,7 +76,9 @@ cd frontend && bun run build && cd ..
 │   │   ├── web/
 │   │   │   ├── __init__.py    # Flask app factory
 │   │   │   ├── routes.py      # API Blueprint routes
-│   │   │   └── templates/     # Jinja2 templates
+│   │   │   └── templates/     # Jinja2 templates (HTMX partials)
+│   │   │       ├── index.html      # Reference file (unused)
+│   │   │       └── main_content.html  # HTMX partial template
 │   │   ├── __init__.py
 │   │   ├── cli.py             # CLI application
 │   │   ├── wsgi.py            # WSGI entry point
@@ -95,8 +96,7 @@ cd frontend && bun run build && cd ..
 ├── .gitignore                  # Git ignore rules
 ├── AGENTS.md                   # AI assistant configuration
 ├── README.md                   # User documentation
-├── DEV.md                      # This developer guide
-└── INSTRUCTIONS.md             # Migration tracking
+└── DEV.md                      # This developer guide
 ```
 
 ## Development Workflow
@@ -172,6 +172,15 @@ Use HTMX for server-driven updates:
 <div id="result"></div>
 ```
 
+Use Alpine.js for client-side interactivity:
+
+```html
+<div x-data="{ count: 0 }">
+  <button x-on:click="count++">Increment</button>
+  <span>Count: <span x-text="count"></span></span>
+</div>
+```
+
 ## Building for Production
 
 ```bash
@@ -186,6 +195,35 @@ just run
 ```
 
 ## Code Architecture
+
+### Frontend vs Backend HTML Relationship
+
+The project has two different HTML files serving distinct purposes:
+
+| File | Purpose | When Used |
+|------|---------|-----------|
+| `frontend/index.html` | Vite dev server entry point | Development only |
+| `backend/boilerplate_app/web/templates/index.html` | Reference/template (unused in production) | Documentation only |
+
+**Development Flow:**
+1. Vite dev server serves `frontend/index.html` at port 43210
+2. Vite injects the script tag (`<script type="module" src="/src/main.ts"></script>`) for hot module replacement
+3. Tailwind CSS v4 scans both frontend source (`@source ".."`) and backend templates (`@source "../../backend/boilerplate_app/web/templates"`)
+4. Backend templates (`main_content.html`) are served as HTMX partials via `/api/main-content`
+
+**Production Flow:**
+1. `bun run build` generates optimized files to `frontend/dist/`
+2. Flask serves the built `index.html` from `frontend/dist/` (not the backend template)
+3. Flask routes `/assets/*` and `/vite.svg` to static files
+4. HTMX endpoints render Jinja2 templates as HTML partials
+
+**Important Notes:**
+- The backend `templates/index.html` is **NOT** served by Flask in production
+- Tailwind scans backend templates to generate CSS for classes used in Jinja2/HTMX responses
+- Backend `templates/main_content.html` is rendered dynamically by the `/api/main-content` route
+- Only the built `frontend/dist/index.html` is served to users in production
+
+**Note:** The backend `templates/index.html` file is a reference/template and is not used in the application. It can be considered for removal or kept as documentation of the expected HTML structure.
 
 ### Frontend Components
 
@@ -209,12 +247,18 @@ just run
 
 ```
 Development:
-  Browser → Vite (43210) → [static files]
-                        → /api/* → Flask (43280)
+  Browser → Vite (43210) → [serves frontend/index.html]
+                         → [injected script tag → main.ts]
+                         → /api/* → Flask (43280) → [renders Jinja2 templates]
 
 Production:
-  Browser → Gunicorn (43280) → [static from dist/]
-                             → /api/* → Flask routes
+  Browser → Gunicorn (43280) → [serves frontend/dist/index.html]
+                              → [serves frontend/dist/assets/*]
+                              → /api/* → [renders Jinja2 templates as HTML partials]
+
+Tailwind v4:
+  Scans: frontend/src/*, frontend/index.html, backend/boilerplate_app/web/templates/*
+  Output: optimized CSS bundle
 ```
 
 ## Code Style

@@ -1,2 +1,8 @@
 @import "tailwindcss";
+
 @plugin "daisyui";
+
+@source "../../backend/boilerplate_app/web/templates";
+@source "../index.html";
+@source ".";
+
