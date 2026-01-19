@@ -119,7 +119,7 @@ def run(message: str, json_output: bool) -> None:
 @app.command()
 def demo_duckdb():
     """Demonstrate DuckDB functionality with sample queries."""
-    from boilerplate_app.duckdb_example import example_queries
+    from boilerplate_app.examples.duckdb_example import example_queries
     console.print("[bold cyan]DuckDB Example:[/bold cyan]\n")
     example_queries()
 
@@ -127,7 +127,7 @@ def demo_duckdb():
 @app.command()
 def demo_polars():
     """Demonstrate Polars functionality with DataFrame operations."""
-    from boilerplate_app.polars_example import example_dataframe_operations, example_data_transformation
+    from boilerplate_app.examples.polars_example import example_dataframe_operations, example_data_transformation
     console.print("[bold cyan]Polars Example:[/bold cyan]\n")
     example_dataframe_operations()
     example_data_transformation()
@@ -136,7 +136,7 @@ def demo_polars():
 @app.command()
 def demo_cattrs():
     """Demonstrate cattrs functionality with dataclass serialization."""
-    from boilerplate_app.cattrs_example import (
+    from boilerplate_app.examples.cattrs_example import (
         example_basic_serialization,
         example_list_serialization,
         example_nested_dataclasses,

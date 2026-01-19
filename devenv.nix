@@ -13,7 +13,7 @@ let
 in
 {
   # https://devenv.sh/basics/
-  env.SESSION_NAME = "boilerplate-web";
+  env.SESSION_NAME = "opencode-boilerplate-web";
   env.GIT_EXTERNAL_DIFF = "${pkgs.difftastic}/bin/difft";
 
   env.UV_PROJECT = "${config.devenv.root}/backend";
@@ -90,6 +90,8 @@ in
     # hello
     unset PS1
     eval $(starship init bash)
+    source $DEVENV_STATE/venv/bin/activate
+    export VIRTUAL_ENV_PROMPT="$SESSION_NAME"
   '';
 
   # https://devenv.sh/tasks/
