@@ -16,6 +16,9 @@ in
   env.SESSION_NAME = "boilerplate-web";
   env.GIT_EXTERNAL_DIFF = "${pkgs.difftastic}/bin/difft";
 
+  env.UV_PROJECT = "${config.devenv.root}/backend";
+  env.UV_PROJECT_ENVIRONMENT = "${config.devenv.root}/.devenv/state/venv";
+
   # https://devenv.sh/packages/
   packages = [
     zshell
@@ -43,7 +46,7 @@ in
   languages.python.uv.enable = true;
   languages.python.uv.sync.enable = true;
   languages.python.directory = "backend";
-  languages.python.venv.enable = true;
+  # languages.python.venv.enable = true;
   languages.python.lsp.enable = false; # manually installed via pkgs above
   languages.javascript.enable = true;
   languages.javascript.bun.enable = true;

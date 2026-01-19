@@ -33,7 +33,7 @@ just clean     # Remove dist/ directory
 
 ## Development
 
-The Vite dev server runs on port 43210 and proxies `/api/*` requests to Flask on port 43280.
+The Vite dev server runs on port 43210 and proxies `/api/*` requests to Starlette on port 43280.
 
 ```bash
 # Start frontend dev server
@@ -88,7 +88,7 @@ HTMX is imported in `main.ts`. Use `hx-*` attributes for server interactions:
 just build
 ```
 
-Output is placed in `dist/` which Flask serves in production mode.
+Output is placed in `dist/` which Starlette serves in production mode.
 
 ## Dependencies
 

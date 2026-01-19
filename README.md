@@ -1,6 +1,6 @@
 # Boilerplate Web Template
 
-A modern full-stack web application template with Vite + Flask, demonstrating a clean separation between frontend and backend.
+A modern full-stack web application template with Vite + Starlette, demonstrating a clean separation between frontend and backend.
 Built with `nix` & `devenv` for reproducible environments.
 Terminal first for taking advantage of agent workflows like `opencode`.
 
@@ -15,12 +15,13 @@ Terminal first for taking advantage of agent workflows like `opencode`.
 - Hot module replacement in development
 
 ### Backend
-- Flask with Blueprint-based API routes
-- WSGI factory compatible with gunicorn
+- Starlette (ASGI) with Route lists
+- ASGI factory compatible with Granian
 - Jinja2 templating support
 - CLI tools with Click + Rich + sh libraries
 - Data processing with Polars and DuckDB
 - Dataclass serialization with cattrs
+- Async view pattern with run_in_threadpool
 
 ### Infrastructure
 - Reproducible Nix/devenv environment
@@ -43,39 +44,28 @@ Terminal first for taking advantage of agent workflows like `opencode`.
 devenv shell
 
 # Install frontend dependencies
-cd frontend && bun install && cd ..
+just build
 
 # Start development servers (frontend + backend)
-just dev
+just dev-frontend
+just dev-backend
 ```
 
 This starts:
 - Vite dev server at http://localhost:43210
-- Flask API server at http://localhost:43280
+- Starlette API server at http://localhost:43280
 
-The Vite dev server proxies `/api/*` requests to Flask automatically.
+The Vite dev server proxies `/api/*` requests to Starlette automatically.
 
 ### Available Commands
 
 ```bash
 # Development
-just dev              # Start both frontend and backend dev servers
 just dev-frontend     # Start only Vite dev server (port 43210)
-just dev-backend      # Start only Flask dev server (port 43280)
+just dev-backend      # Start only Starlette dev server (port 43280)
 
-# Production
+# Build
 just build            # Build frontend for production
-just run              # Start production server with gunicorn
-
-# CLI Tools
-just run-cli          # Run CLI application
-just run-custom       # Run CLI with custom message
-just run-json         # Run CLI with JSON output
-
-# Demos
-just demo-duckdb      # DuckDB query examples
-just demo-polars      # Polars DataFrame examples
-just demo-cattrs      # Cattrs serialization examples
 ```
 
 ## Project Structure
@@ -90,14 +80,14 @@ just demo-cattrs      # Cattrs serialization examples
 │   ├── vite.config.ts         # Vite configuration
 │   ├── package.json           # Frontend dependencies
 │   └── justfile               # Frontend-specific commands
-├── backend/                    # Flask + Python backend
+├── backend/                    # Starlette + Python backend
 │   ├── boilerplate_app/
 │   │   ├── web/
-│   │   │   ├── __init__.py    # Flask app factory
-│   │   │   ├── routes.py      # API Blueprint routes
+│   │   │   ├── __init__.py    # Starlette app factory
+│   │   │   ├── routes.py      # API Route definitions
 │   │   │   └── templates/     # Jinja2 templates
 │   │   ├── cli.py             # CLI application
-│   │   ├── wsgi.py            # WSGI entry point
+│   │   ├── asgi.py            # ASGI entry point
 │   │   └── *_example.py       # Demo modules
 │   ├── pyproject.toml         # Python package config
 │   └── justfile               # Backend-specific commands
@@ -115,7 +105,7 @@ just demo-cattrs      # Cattrs serialization examples
 ┌─────────────────────────────────────────────────────────────┐
 │                     Development Mode                         │
 ├─────────────────────────────────────────────────────────────┤
-│  Browser ──► Vite (43210) ──► Flask API (43280)             │
+│  Browser ──► Vite (43210) ──► Starlette API (43280)         │
 │              │                    │                          │
 │              ├─ Serves index.html  ├─ /api/main-content     │
 │              ├─ Injects script    │   (renders Jinja2)      │
@@ -126,7 +116,7 @@ just demo-cattrs      # Cattrs serialization examples
 ┌─────────────────────────────────────────────────────────────┐
 │                     Production Mode                          │
 ├─────────────────────────────────────────────────────────────┤
-│  Browser ──► Gunicorn (43280)                                │
+│  Browser ──► Granian (43280)                                │
 │                  │                                           │
 │                  ├─ Serves built frontend/dist/index.html    │
 │                  ├─ Serves built frontend/dist/assets/*      │
@@ -147,8 +137,8 @@ Tailwind v4 scans:
 | Styling | Tailwind CSS + DaisyUI | Utility-first CSS with components |
 | Server UI Updates | HTMX | Server-driven UI updates |
 | Client Behavior | Alpine.js | Client-side behavior |
-| Backend | Flask | Python web framework |
-| WSGI | Gunicorn | Production server |
+| Backend | Starlette | Python ASGI web framework |
+| ASGI | Granian | Production server |
 | CLI | Click + Rich | Command-line interface |
 | Data | Polars + DuckDB | Data processing |
 | Package Mgmt | UV (Python), Bun (JS) | Fast dependency management |
@@ -161,6 +151,8 @@ Tailwind v4 scans:
 | `/api/hello` | GET | JSON | Returns greeting message |
 | `/api/hello` | POST | JSON | Returns personalized greeting |
 | `/api/hello-htmx` | GET | HTML | Returns HTML partial for HTMX |
+| `/api/duckdb-example` | GET | JSON | Returns DuckDB query results |
+| `/api/polars-example` | GET | JSON | Returns Polars DataFrame processing results |
 
 ## Development
 

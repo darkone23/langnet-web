@@ -1,6 +1,6 @@
 # Backend
 
-Flask-based backend with CLI tools, serving both API endpoints and the production frontend.
+Starlette-based backend with CLI tools, serving both API endpoints and the production frontend.
 
 ## Structure
 
@@ -8,12 +8,12 @@ Flask-based backend with CLI tools, serving both API endpoints and the productio
 backend/
 ├── boilerplate_app/
 │   ├── web/
-│   │   ├── __init__.py        # Flask app factory
-│   │   ├── routes.py          # API Blueprint routes
+│   │   ├── __init__.py        # Starlette app factory
+│   │   ├── routes.py          # API Route definitions
 │   │   └── templates/         # Jinja2 templates
 │   ├── __init__.py
 │   ├── cli.py                 # CLI application (Click + Rich)
-│   ├── wsgi.py                # WSGI entry point
+│   ├── asgi.py                # ASGI entry point
 │   ├── cattrs_example.py      # Cattrs serialization demos
 │   ├── duckdb_example.py      # DuckDB query demos
 │   └── polars_example.py      # Polars DataFrame demos
@@ -26,8 +26,8 @@ backend/
 
 ```bash
 # From backend/ directory
-just dev          # Start Flask dev server (port 43280)
-just run-server   # Start gunicorn production server
+just dev          # Start Starlette dev server (port 43280)
+just run-server   # Start Granian production server
 just run-cli      # Run CLI application
 just run-custom   # Run CLI with custom message
 just run-json     # Run CLI with JSON output
@@ -41,31 +41,40 @@ just uv-sync      # Sync Python dependencies
 
 | Endpoint | Method | Response | Description |
 |----------|--------|----------|-------------|
-| `/api/hello` | GET | JSON | Returns `{"message": "Hello from Flask API!"}` |
+| `/api/hello` | GET | JSON | Returns `{"message": "Hello from Starlette API!"}` |
 | `/api/hello` | POST | JSON | Returns personalized greeting with `name` from body |
 | `/api/hello-htmx` | GET | HTML | Returns HTML partial for HTMX consumption |
+| `/api/duckdb-example` | GET | JSON | Returns DuckDB query results |
+| `/api/polars-example` | GET | JSON | Returns Polars DataFrame processing results |
 
 ## Adding New Endpoints
 
 Edit `boilerplate_app/web/routes.py`:
 
 ```python
-@api.route('/my-endpoint', methods=['GET'])
-def my_endpoint():
-    return jsonify({'key': 'value'})
+from starlette.responses import JSONResponse, Response
+from starlette.routing import Route
 
-@api.route('/my-htmx-endpoint', methods=['GET'])
-def my_htmx_endpoint():
+async def my_endpoint(request):
+    return JSONResponse({'key': 'value'})
+
+async def my_htmx_endpoint(request):
     """Return HTML for HTMX targets"""
-    return '<div class="alert">Content here</div>'
+    return Response(content='<div class="alert">Content here</div>', media_type='text/html')
+
+api_routes = [
+    Route('/my-endpoint', my_endpoint, methods=['GET']),
+    Route('/my-htmx-endpoint', my_htmx_endpoint, methods=['GET']),
+]
 ```
 
 ## Dependencies
 
 Managed via `pyproject.toml` with UV:
 
-- **flask**: Web framework
-- **gunicorn**: Production WSGI server
+- **starlette**: ASGI web framework
+- **granian**: Production ASGI server
+- **uvicorn**: Development ASGI server
 - **jinja2**: Templating engine
 - **click**: CLI framework
 - **rich**: Terminal formatting
@@ -76,7 +85,7 @@ Managed via `pyproject.toml` with UV:
 
 ## Production
 
-In production, Flask serves the built frontend from `frontend/dist/`:
+In production, Starlette serves the built frontend from `frontend/dist/`:
 
 ```bash
 # Build frontend first (from root)

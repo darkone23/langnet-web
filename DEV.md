@@ -7,7 +7,7 @@ This document provides instructions for developers working on this full-stack we
 This is a fully functional full-stack web application template with the following characteristics:
 
 - **Frontend**: Vite + TypeScript + Tailwind CSS + DaisyUI + HTMX + Alpine.js
-- **Backend**: Flask + Blueprint routes + Jinja2 + Gunicorn
+- **Backend**: Starlette (ASGI) + Route lists + Jinja2 + Granian
 - **CLI**: Click + Rich + sh libraries
 - **Data Processing**: Polars + DuckDB + cattrs
 - **Environment**: Nix/devenv + UV (Python) + Bun (JavaScript)
@@ -50,7 +50,7 @@ which bun       # Should show devenv's bun
 which node      # Should show devenv's node
 
 # Test Python dependencies
-uv run python -c "import flask, click, rich, duckdb, polars, cattrs; print('Python deps OK')"
+uv run python -c "import starlette, click, rich, duckdb, polars, cattrs; print('Python deps OK')"
 
 # Test frontend dependencies
 cd frontend && bun run build && cd ..
@@ -74,14 +74,14 @@ cd frontend && bun run build && cd ..
 ├── backend/                    # Backend application
 │   ├── boilerplate_app/
 │   │   ├── web/
-│   │   │   ├── __init__.py    # Flask app factory
-│   │   │   ├── routes.py      # API Blueprint routes
+│   │   │   ├── __init__.py    # Starlette app factory
+│   │   │   ├── routes.py      # API Route definitions
 │   │   │   └── templates/     # Jinja2 templates (HTMX partials)
 │   │   │       ├── index.html      # Reference file (unused)
 │   │   │       └── main_content.html  # HTMX partial template
 │   │   ├── __init__.py
 │   │   ├── cli.py             # CLI application
-│   │   ├── wsgi.py            # WSGI entry point
+│   │   ├── asgi.py            # ASGI entry point
 │   │   ├── cattrs_example.py  # Cattrs examples
 │   │   ├── duckdb_example.py  # DuckDB examples
 │   │   └── polars_example.py  # Polars examples
@@ -109,10 +109,10 @@ just dev
 
 # Or start them separately in different terminals:
 just dev-frontend    # Vite at http://localhost:43210
-just dev-backend     # Flask at http://localhost:43280
+just dev-backend     # Starlette at http://localhost:43280
 ```
 
-The Vite dev server proxies all `/api/*` requests to Flask, so you can develop the full stack from `http://localhost:43210`.
+The Vite dev server proxies all `/api/*` requests to Starlette, so you can develop the full stack from `http://localhost:43210`.
 
 ### Making Frontend Changes
 
@@ -132,13 +132,13 @@ bun run preview  # Preview production build
 ### Making Backend Changes
 
 1. Edit files in `backend/boilerplate_app/`
-2. Flask dev server auto-reloads on file changes
+2. Starlette dev server auto-reloads on file changes
 3. Test API endpoints at `http://localhost:43280/api/*`
 
 ```bash
 # Backend-specific commands (from backend/ directory)
-just dev         # Start Flask dev server
-just run-server  # Start gunicorn production server
+just dev         # Start Starlette dev server
+just run-server  # Start Granian production server
 just run-cli     # Run CLI application
 ```
 
@@ -147,18 +147,21 @@ just run-cli     # Run CLI application
 Edit `backend/boilerplate_app/web/routes.py`:
 
 ```python
-from flask import Blueprint, jsonify, request
+from starlette.responses import JSONResponse, Response
+from starlette.routing import Route
 
-api = Blueprint('api', __name__)
+async def my_endpoint(request):
+    return JSONResponse({'data': 'value'})
 
-@api.route('/my-endpoint', methods=['GET'])
-def my_endpoint():
-    return jsonify({'data': 'value'})
-
-@api.route('/my-htmx-endpoint', methods=['GET'])
-def my_htmx_endpoint():
+async def my_htmx_endpoint(request):
     """Return HTML partial for HTMX"""
-    return '<div class="alert alert-info">Hello from HTMX!</div>'
+    html = '<div class="alert alert-info">Hello from HTMX!</div>'
+    return Response(content=html, media_type='text/html')
+
+api_routes = [
+    Route('/my-endpoint', my_endpoint, methods=['GET']),
+    Route('/my-htmx-endpoint', my_htmx_endpoint, methods=['GET']),
+]
 ```
 
 ### Adding Frontend Interactivity
@@ -188,7 +191,7 @@ Use Alpine.js for client-side interactivity:
 just build
 
 # The built files are output to frontend/dist/
-# Flask serves these automatically in production mode
+# Starlette serves these automatically in production mode
 
 # Start production server
 just run
@@ -213,12 +216,12 @@ The project has two different HTML files serving distinct purposes:
 
 **Production Flow:**
 1. `bun run build` generates optimized files to `frontend/dist/`
-2. Flask serves the built `index.html` from `frontend/dist/` (not the backend template)
-3. Flask routes `/assets/*` and `/vite.svg` to static files
+2. Starlette serves the built `index.html` from `frontend/dist/` (not the backend template)
+3. Starlette routes `/assets/*` and `/vite.svg` to static files
 4. HTMX endpoints render Jinja2 templates as HTML partials
 
 **Important Notes:**
-- The backend `templates/index.html` is **NOT** served by Flask in production
+- The backend `templates/index.html` is **NOT** served by Starlette in production
 - Tailwind scans backend templates to generate CSS for classes used in Jinja2/HTMX responses
 - Backend `templates/main_content.html` is rendered dynamically by the `/api/main-content` route
 - Only the built `frontend/dist/index.html` is served to users in production
@@ -238,9 +241,9 @@ The project has two different HTML files serving distinct purposes:
 
 | File | Purpose |
 |------|---------|
-| `web/__init__.py` | Flask app factory, static file serving |
-| `web/routes.py` | API Blueprint with route handlers |
-| `wsgi.py` | WSGI entry point for gunicorn |
+| `web/__init__.py` | Starlette app factory, static file serving |
+| `web/routes.py` | API Route definitions with async handlers |
+| `asgi.py` | ASGI entry point for Granian |
 | `cli.py` | Click-based CLI application |
 
 ### Request Flow
@@ -248,13 +251,13 @@ The project has two different HTML files serving distinct purposes:
 ```
 Development:
   Browser → Vite (43210) → [serves frontend/index.html]
-                         → [injected script tag → main.ts]
-                         → /api/* → Flask (43280) → [renders Jinja2 templates]
+                          → [injected script tag → main.ts]
+                          → /api/* → Starlette (43280) → [renders Jinja2 templates]
 
 Production:
-  Browser → Gunicorn (43280) → [serves frontend/dist/index.html]
-                              → [serves frontend/dist/assets/*]
-                              → /api/* → [renders Jinja2 templates as HTML partials]
+  Browser → Granian (43280) → [serves frontend/dist/index.html]
+                             → [serves frontend/dist/assets/*]
+                             → /api/* → [renders Jinja2 templates as HTML partials]
 
 Tailwind v4:
   Scans: frontend/src/*, frontend/index.html, backend/boilerplate_app/web/templates/*
@@ -264,9 +267,11 @@ Tailwind v4:
 ## Code Style
 
 ### Python
-- Use Flask Blueprints for route organization
-- Return `jsonify()` for JSON endpoints
-- Return HTML strings for HTMX endpoints
+- Use Starlette Route lists for route organization
+- Return `JSONResponse` for JSON endpoints
+- Return `Response` with HTML content for HTMX endpoints
+- Use async/await for route handlers
+- Use `run_in_threadpool` for blocking operations like DuckDB queries
 - Use type hints for function parameters and returns
 - Follow PEP 8 naming conventions
 
@@ -285,17 +290,11 @@ Tailwind v4:
 ### Manual Testing
 
 ```bash
-# Test full stack
-just dev
-# Visit http://localhost:43210
-
 # Test API directly
 curl http://localhost:43280/api/hello
 curl http://localhost:43280/api/hello-htmx
-
-# Test CLI
-just run-cli
-just run-json
+curl http://localhost:43280/api/duckdb-example
+curl http://localhost:43280/api/polars-example
 ```
 
 ### Demo Commands
@@ -335,17 +334,17 @@ bun run dev    # Try again
 devenv shell
 
 # Use uv run for Python execution
-uv run python -c "import flask; print('OK')"
+uv run python -c "import starlette; print('OK')"
 ```
 
-**Flask won't start:**
+**Starlette won't start:**
 ```bash
 cd backend
 just dev    # Check error output
 ```
 
 **API proxy not working:**
-- Ensure Flask is running on port 43280
+- Ensure Starlette is running on port 43280
 - Check Vite proxy config in `vite.config.ts`
 - Look for CORS errors in browser console
 
@@ -371,7 +370,7 @@ cd frontend && bun install && cd ..
 | Service | Port | Purpose |
 |---------|------|---------|
 | Vite | 43210 | Frontend dev server |
-| Flask | 43280 | Backend API server |
+| Starlette | 43280 | Backend API server |
 
 ## Adding Dependencies
 
