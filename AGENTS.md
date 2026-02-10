@@ -8,7 +8,6 @@ Full-stack web application with Vite frontend and Starlette backend. Nix/devenv-
 - **Backend**: Starlette (ASGI) + Route lists + Jinja2 + Granian
 - **CLI**: Click + Rich + sh libraries
 - **Data**: Polars + DuckDB + cattrs
-- **Package Management**: UV (Python), Bun (JavaScript)
 - **Environment**: Nix + devenv
 
 ## Code Structure
@@ -23,17 +22,7 @@ Full-stack web application with Vite frontend and Starlette backend. Nix/devenv-
 │   ├── vite.config.ts         # Vite configuration (proxy to Starlette)
 │   ├── package.json           # Frontend dependencies
 │   └── justfile               # Frontend commands
-├── backend/                    # Starlette backend application
-│   ├── boilerplate_app/
-│   │   ├── web/
-│   │   │   ├── __init__.py    # Starlette app factory
-│   │   │   ├── routes.py      # API Route definitions
-│   │   │   └── templates/     # Jinja2 templates
-│   │   ├── cli.py             # CLI application
-│   │   ├── asgi.py            # ASGI entry point
-│   │   └── *_example.py       # Demo modules
-│   ├── pyproject.toml         # Python package config
-│   └── justfile               # Backend commands
+├── backend/                    # zig backend application
 ├── devenv.nix                  # Development environment
 ├── devenv.yaml                 # Devenv inputs
 ├── justfile                    # Root task runner
@@ -64,7 +53,6 @@ These commands may be run for project automation.
 - `devenv shell just -- -f ./backend/justfile demo-cattrs` - Run cattrs demonstration
 
 ### Utilities
-- `devenv shell just -- -f ./backend/justfile uv-sync` - Sync Python dependencies
 - `devenv shell bash -- -c "$somebash"` - Run bash script inside devenv
 
 ## Operator Commands
@@ -73,13 +61,13 @@ These commands are intended to only be run by the project operator.
 
 ### Development
 - `devenv shell just -- -f ./justfile dev-frontend` - Start Vite dev server (port 43210)
-- `devenv shell just -- -f ./justfile dev-backend` - Start Starlette dev server (port 43280)
+- `devenv shell just -- -f ./justfile dev-backend` - Start zig dev server (port 43280)
 - `devenv shell just -- -f ./backend/justfile run-server` - Start production server with Granian
 - `devenv shell just -- devenv-zell` - Enter developer session with zellij
 
 ## Ports
 - **43210**: Vite dev server (frontend)
-- **43280**: Starlette server (backend API)
+- **43280**: zig server (backend API)
 
 ## API Endpoints
 - `GET /api/hello` - Returns JSON greeting
@@ -89,15 +77,6 @@ These commands are intended to only be run by the project operator.
 - `GET /api/polars-example` - Returns Polars DataFrame processing results as JSON
 
 ## Code Style
-
-### Python
-- Use Starlette Route lists for route organization
-- Return `JSONResponse` for JSON endpoints, HTML strings for HTMX
-- Use Click for CLI, `sh` library for subprocess calls, `rich` for pretty printing
-- Type hints for function parameters and returns
-- snake_case for variables/functions, PascalCase for classes
-- Use `request.app.state.db` for database access (no flask.g or flask.current_app)
-- Use `run_in_threadpool` for blocking operations like DuckDB queries
 
 ### TypeScript
 - Strict mode enabled

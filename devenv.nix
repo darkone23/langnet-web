@@ -13,7 +13,7 @@ let
 in
 {
   # https://devenv.sh/basics/
-  env.SESSION_NAME = "opencode-boilerplate-web";
+  env.SESSION_NAME = "langnet-web";
   env.GIT_EXTERNAL_DIFF = "${pkgs.difftastic}/bin/difft";
 
   env.UV_PROJECT = "${config.devenv.root}/backend";
@@ -34,20 +34,21 @@ in
     pkgs.duckdb
 
     # python dev tools
-    pkgs.python3Packages.python-lsp-server
-    pkgs.python3Packages.jedi-language-server
-    pkgs.python3Packages.ruff
-    pkgs.ty
+    # pkgs.python3Packages.python-lsp-server
+    # pkgs.python3Packages.jedi-language-server
+    # pkgs.python3Packages.ruff
+    # pkgs.ty
 
   ];
 
   # https://devenv.sh/languages/
-  languages.python.enable = true;
-  languages.python.uv.enable = true;
-  languages.python.uv.sync.enable = true;
-  languages.python.directory = "backend";
+  # languages.python.enable = true;
+  # languages.python.uv.enable = true;
+  # languages.python.uv.sync.enable = true;
+  # languages.python.directory = "backend";
+  languages.zig.enable = true;
   # languages.python.venv.enable = true;
-  languages.python.lsp.enable = false; # manually installed via pkgs above
+  # languages.python.lsp.enable = false; # manually installed via pkgs above
   languages.javascript.enable = true;
   languages.javascript.bun.enable = true;
   languages.javascript.bun.install.enable = true;

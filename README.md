@@ -1,6 +1,6 @@
-# Boilerplate Web Template
+# langnet-web
 
-A modern full-stack web application template with Vite + Starlette, demonstrating a clean separation between frontend and backend.
+A modern full-stack web application template with Vite + zig, demonstrating a clean separation between frontend and backend.
 Built with `nix` & `devenv` for reproducible environments.
 Terminal first for taking advantage of agent workflows like `opencode`.
 
@@ -15,17 +15,10 @@ Terminal first for taking advantage of agent workflows like `opencode`.
 - Hot module replacement in development
 
 ### Backend
-- Starlette (ASGI) with Route lists
-- ASGI factory compatible with Granian
-- Jinja2 templating support
-- CLI tools with Click + Rich + sh libraries
-- Data processing with Polars and DuckDB
-- Dataclass serialization with cattrs
-- Async view pattern with run_in_threadpool
+- ???
 
 ### Infrastructure
 - Reproducible Nix/devenv environment
-- UV for fast Python dependency management
 - Bun for fast frontend package management
 - Task automation with Just
 - Vite proxy for seamless API development
@@ -53,16 +46,16 @@ just dev-backend
 
 This starts:
 - Vite dev server at http://localhost:43210
-- Starlette API server at http://localhost:43280
+- zig API server at http://localhost:43280
 
-The Vite dev server proxies `/api/*` requests to Starlette automatically.
+The Vite dev server proxies `/api/*` requests to zig automatically.
 
 ### Available Commands
 
 ```bash
 # Development
 just dev-frontend     # Start only Vite dev server (port 43210)
-just dev-backend      # Start only Starlette dev server (port 43280)
+just dev-backend      # Start only zig dev server (port 43280)
 
 # Build
 just build            # Build frontend for production
@@ -80,17 +73,7 @@ just build            # Build frontend for production
 │   ├── vite.config.ts         # Vite configuration
 │   ├── package.json           # Frontend dependencies
 │   └── justfile               # Frontend-specific commands
-├── backend/                    # Starlette + Python backend
-│   ├── boilerplate_app/
-│   │   ├── web/
-│   │   │   ├── __init__.py    # Starlette app factory
-│   │   │   ├── routes.py      # API Route definitions
-│   │   │   └── templates/     # Jinja2 templates
-│   │   ├── cli.py             # CLI application
-│   │   ├── asgi.py            # ASGI entry point
-│   │   └── *_example.py       # Demo modules
-│   ├── pyproject.toml         # Python package config
-│   └── justfile               # Backend-specific commands
+├── backend/                    # zig backend
 ├── devenv.nix                  # Development environment
 ├── devenv.yaml                 # Devenv inputs
 ├── justfile                    # Root task runner
@@ -105,7 +88,7 @@ just build            # Build frontend for production
 ┌─────────────────────────────────────────────────────────────┐
 │                     Development Mode                         │
 ├─────────────────────────────────────────────────────────────┤
-│  Browser ──► Vite (43210) ──► Starlette API (43280)         │
+│  Browser ──► Vite (43210) ──► zig API (43280)         │
 │              │                    │                          │
 │              ├─ Serves index.html  ├─ /api/main-content     │
 │              ├─ Injects script    │   (renders Jinja2)      │
@@ -137,11 +120,7 @@ Tailwind v4 scans:
 | Styling | Tailwind CSS + DaisyUI | Utility-first CSS with components |
 | Server UI Updates | HTMX | Server-driven UI updates |
 | Client Behavior | Alpine.js | Client-side behavior |
-| Backend | Starlette | Python ASGI web framework |
-| ASGI | Granian | Production server |
-| CLI | Click + Rich | Command-line interface |
-| Data | Polars + DuckDB | Data processing |
-| Package Mgmt | UV (Python), Bun (JS) | Fast dependency management |
+| Backend | zig | web framework |
 | Environment | Nix + devenv | Reproducible development |
 
 ## API Endpoints

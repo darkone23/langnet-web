@@ -1,0 +1,39 @@
+default:
+    @just run-server
+
+# Dependencies: Sync Python dependencies with UV
+uv-sync:
+    uv sync
+
+# CLI: Run CLI application
+run-cli:
+    uv run boilerplate-cli run
+
+# CLI: Run CLI with custom message
+run-custom:
+    uv run boilerplate-cli run --message "Custom message!"
+
+# CLI: Run CLI with JSON output
+run-json:
+    uv run boilerplate-cli run --json
+
+# Demo: Run DuckDB demonstration
+demo-duckdb:
+    uv run boilerplate-cli demo-duckdb
+
+# Demo: Run Polars demonstration
+demo-polars:
+    uv run boilerplate-cli demo-polars
+
+# Demo: Run cattrs demonstration
+demo-cattrs:
+    uv run boilerplate-cli demo-cattrs
+
+# Web: Start Starlette dev server
+dev:
+    uv run uvicorn boilerplate_app.asgi:app --host 0.0.0.0 --port 43280 --reload
+
+# Web: Start production server with Granian
+run-server:
+    uv run granian --interface asgi --workers 2 --runtime-threads 2 --host 0.0.0.0 --port 43280 boilerplate_app.asgi:app
+

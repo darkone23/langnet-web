@@ -1,5 +1,5 @@
 [project]
-name = "opencode-boilerplate-web"
+name = "langnet-web"
 version = "0.1.0"
 description = "A boilerplate web application demonstrating modern Python tooling with Nix/devenv - Starlette backend"
 requires-python = ">=3.8"
