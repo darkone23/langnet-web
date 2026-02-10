@@ -81,6 +81,7 @@ pub fn build(b: *std.Build) void {
                 .{ .name = "backend", .module = mod },
             },
         }),
+        .use_llvm = true,
     });
 
     // This declares intent for the executable to be installed into the
@@ -120,6 +121,7 @@ pub fn build(b: *std.Build) void {
     // set the releative field.
     const mod_tests = b.addTest(.{
         .root_module = mod,
+        .use_llvm = true,
     });
 
     // A run step that will run the test executable.
@@ -130,6 +132,7 @@ pub fn build(b: *std.Build) void {
     // hence why we have to create two separate ones.
     const exe_tests = b.addTest(.{
         .root_module = exe.root_module,
+        .use_llvm = true,
     });
 
     // A run step that will run the second test executable.

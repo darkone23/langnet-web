@@ -38,6 +38,7 @@ in
     # pkgs.python3Packages.jedi-language-server
     # pkgs.python3Packages.ruff
     # pkgs.ty
+    pkgs.lldb
 
   ];
 

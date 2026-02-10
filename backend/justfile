@@ -15,5 +15,9 @@ cli *args:
 
 cli-example:
     just cli query lat sedat --output json | nu -c 'cat | from json | to yaml'
-    
 
+readme-zzz:
+    curl https://raw.githubusercontent.com/tardy-org/zzz/refs/heads/main/docs/getting_started.md
+    
+install-zzz:
+    zig fetch --save "git+https://github.com/tardy-org/zzz#v0.3.0-rc1"
