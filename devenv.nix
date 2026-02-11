@@ -48,6 +48,7 @@ in
   # languages.python.uv.sync.enable = true;
   # languages.python.directory = "backend";
   languages.zig.enable = true;
+  # languages.zig.version = "0.14.1";
   # languages.python.venv.enable = true;
   # languages.python.lsp.enable = false; # manually installed via pkgs above
   languages.javascript.enable = true;
@@ -92,8 +93,8 @@ in
     # hello
     unset PS1
     eval $(starship init bash)
-    source $DEVENV_STATE/venv/bin/activate
-    export VIRTUAL_ENV_PROMPT="$SESSION_NAME"
+    # source $DEVENV_STATE/venv/bin/activate
+    # export VIRTUAL_ENV_PROMPT="$SESSION_NAME"
   '';
 
   # https://devenv.sh/tasks/

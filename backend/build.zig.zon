@@ -33,8 +33,10 @@
     // internet connectivity.
     .dependencies = .{
         .zzz = .{
-            .url = "git+https://github.com/tardy-org/zzz?ref=v0.3.0-rc1#28b3e6c47a7fa3075a4c97094c8f41ada21aba9b",
-            .hash = "zzz-0.2.0-AAAAAIwlAwChG0s0lmMXDN_i_qoUcIACP4maXVtLtssC",
+            .path = "vendor/zzz-nossl",
+        },
+        .mustache = .{
+            .path = "vendor/mustache-zig",
         },
     },
     .paths = .{

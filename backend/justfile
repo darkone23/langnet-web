@@ -16,8 +16,48 @@ cli *args:
 cli-example:
     just cli query lat sedat --output json | nu -c 'cat | from json | to yaml'
 
+run-server:
+    zig build run
+
+run-server-bg:
+    #!/usr/bin/env bash
+    zig build run &
+    echo $! > /tmp/backend-server.pid
+    echo "Server started on http://127.0.0.1:43280 (PID: $(cat /tmp/backend-server.pid))"
+
+stop-server:
+    #!/usr/bin/env bash
+    if [ -f /tmp/backend-server.pid ]; then
+        kill $(cat /tmp/backend-server.pid) 2>/dev/null || true
+        rm /tmp/backend-server.pid
+        echo "Server stopped"
+    else
+        echo "No server PID file found"
+    fi
+
+test-server:
+    #!/usr/bin/env bash
+    # Start server in background
+    zig build run &
+    SERVER_PID=$!
+    sleep 1
+    # Test endpoints
+    echo "Testing health endpoint..."
+    curl -s http://127.0.0.1:43280/health
+    echo ""
+    echo "Testing API endpoint..."
+    curl -s http://127.0.0.1:43280/api
+    echo ""
+    echo "Testing root endpoint..."
+    curl -s http://127.0.0.1:43280/ | head -20
+    # Stop server
+    kill $SERVER_PID 2>/dev/null || true
+
 readme-zzz:
     curl https://raw.githubusercontent.com/tardy-org/zzz/refs/heads/main/docs/getting_started.md
     
 install-zzz:
     zig fetch --save "git+https://github.com/tardy-org/zzz#v0.3.0-rc1"
+    
+install-mustache:
+    zig fetch --save "git+https://github.com/batiati/mustache-zig#master"

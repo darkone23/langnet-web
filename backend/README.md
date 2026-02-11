@@ -1,5 +1,3 @@
----
-
 # Zig SSR Tool Runner
 
 A small, boring, server-side rendered web app written in **Zig**.
@@ -46,9 +44,9 @@ Browser
 Caddy (TLS / proxy / rate limiting)
    │
    ▼
-Zig server (Tokamak)
+Zig server (zzz)
    │
-   ├─ dynamic HTML routes (Zmpl)
+   ├─ dynamic HTML routes (mustache)
    ├─ static assets (/assets/*)
    ├─ subprocess runner
    └─ DuckDB cache
@@ -57,7 +55,7 @@ Zig server (Tokamak)
 * **Caddy**: TLS, proxying, coarse rate limiting
 * **Zig server**: all application logic
 * **DuckDB**: embedded read/write cache
-* **Zmpl**: server-side HTML templates + partials
+* **mustache**: server-side HTML templates + partials
 
 Static assets are served by Zig (even in prod) to keep local development friction low.
 
@@ -125,7 +123,7 @@ Responsibilities:
 * normalize weird shapes
 * shield templates from schema churn
 
-### Templates (Zmpl)
+### Templates (mustache)
 
 * Layouts + partials
 * Mostly plain HTML
@@ -230,7 +228,7 @@ src/
   mapper.zig        // JSON → models
 
 templates/
-  layout.zmpl
+  layout.mustache.html
   pages/
   partials/
 ```

@@ -1,0 +1,6 @@
+[submodule "backend/vendor/zzz-nossl"]
+	path = backend/vendor/zzz-nossl
+	url = git@github.com:darkone23/zzz-nossl.git
+[submodule "backend/vendor/mustache-zig"]
+	path = backend/vendor/mustache-zig
+	url = git@github.com:darkone23/mustache-zig.git

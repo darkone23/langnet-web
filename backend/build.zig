@@ -20,6 +20,16 @@ pub fn build(b: *std.Build) void {
     // of this build script using `b.option()`. All defined flags (including
     // target and optimize options) will be listed when running `zig build --help`
     // in this directory.
+    //
+    const mustache_pkg = b.dependency("mustache", .{
+        .target = target,
+        .optimize = optimize,
+    });
+
+    const zzz_pkg = b.dependency("zzz", .{
+        .target = target,
+        .optimize = optimize,
+    });
 
     // This creates a module, which represents a collection of source files alongside
     // some compilation options, such as optimization mode and linked system libraries.
@@ -83,6 +93,9 @@ pub fn build(b: *std.Build) void {
         }),
         .use_llvm = true,
     });
+
+    exe.root_module.addImport("mustache", mustache_pkg.module("mustache"));
+    exe.root_module.addImport("zzz", zzz_pkg.module("zzz"));
 
     // This declares intent for the executable to be installed into the
     // install prefix when running `zig build` (i.e. when executing the default
