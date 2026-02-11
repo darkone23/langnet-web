@@ -38,6 +38,10 @@
         .mustache = .{
             .path = "vendor/mustache-zig",
         },
+        .zuckdb = .{
+            .url = "git+https://github.com/karlseguin/zuckdb.zig?ref=master#54a22ace9db98cd97fba7f2fdd8fe16de07335ca",
+            .hash = "zuckdb-0.0.0-DpSXVNc4BgBkAOzXQcNkOwctDLGlKtnLnIUepn2I_S-g",
+        },
     },
     .paths = .{
         "build.zig",

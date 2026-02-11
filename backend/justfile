@@ -48,8 +48,25 @@ test-server:
     echo "Testing API endpoint..."
     curl -s http://127.0.0.1:43280/api
     echo ""
+    echo "Testing DB endpoint (zuckdb demo)..."
+    curl -s http://127.0.0.1:43280/db
+    echo ""
     echo "Testing root endpoint..."
     curl -s http://127.0.0.1:43280/ | head -20
+    # Stop server
+    kill $SERVER_PID 2>/dev/null || true
+
+test-db:
+    #!/usr/bin/env bash
+    # Start server in background
+    zig build run &
+    SERVER_PID=$!
+    sleep 1
+    # Test DB endpoint
+    echo "Testing zuckdb endpoint..."
+    echo ""
+    curl -s http://127.0.0.1:43280/db
+    echo ""
     # Stop server
     kill $SERVER_PID 2>/dev/null || true
 

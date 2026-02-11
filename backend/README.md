@@ -65,7 +65,7 @@ Static assets are served by Zig (even in prod) to keep local development frictio
 
 ### HTTP Server
 
-* Routing and lifecycle handled by Tokamak
+* Routing and lifecycle handled by zzz
 * Simple GET + POST endpoints
 * PRG (Post → Redirect → Get) pattern for form submissions
 
