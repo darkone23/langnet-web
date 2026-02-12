@@ -33,7 +33,7 @@ just clean     # Remove dist/ directory
 
 ## Development
 
-The Vite dev server runs on port 43210 and proxies `/api/*` requests to Starlette on port 43280.
+The Vite dev server runs on port 5173 and proxies `/api/*` requests to Zig backend on port 43210.
 
 ```bash
 # Start frontend dev server
@@ -88,7 +88,31 @@ HTMX is imported in `main.ts`. Use `hx-*` attributes for server interactions:
 just build
 ```
 
-Output is placed in `dist/` which Starlette serves in production mode.
+Output is placed in `dist/` which Zig backend serves in production mode.
+
+## Troubleshooting
+
+**Vite won't start:**
+```bash
+bun install
+bun run dev
+```
+
+**Tailwind styles not applying:**
+- Ensure `@import "tailwindcss"` is in `tailwind.css`
+- Ensure `@plugin "daisyui"` is in `tailwind.css`
+- Check that `tailwind.css` is imported in `main.ts`
+
+**HTMX not working:**
+- Check browser console for errors
+- Ensure `htmx.org` is imported in `main.ts`
+- Verify API endpoint returns HTML (not JSON) for HTMX targets
+- Ensure Zig backend is running on port 43210
+
+**API proxy not working:**
+- Ensure Zig is running on port 43210
+- Check Vite proxy config in `vite.config.ts`
+- Look for CORS errors in browser console
 
 ## Dependencies
 

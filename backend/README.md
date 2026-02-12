@@ -1,6 +1,6 @@
 # Zig SSR Tool Runner
 
-A small, boring, server-side rendered web app written in **Zig**.
+A small, boring, server-side rendered web app written in **Zig 0.15.x** (post-writergate).
 
 This project exists to:
 
@@ -14,7 +14,7 @@ This project exists to:
 No users.
 No auth.
 No SPA framework.
-No “web magic”.
+No "web magic".
 
 Just a Zig program that happens to speak HTTP.
 

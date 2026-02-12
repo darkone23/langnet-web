@@ -43,14 +43,7 @@ in
   ];
 
   # https://devenv.sh/languages/
-  # languages.python.enable = true;
-  # languages.python.uv.enable = true;
-  # languages.python.uv.sync.enable = true;
-  # languages.python.directory = "backend";
-  languages.zig.enable = true;
-  # languages.zig.version = "0.14.1";
-  # languages.python.venv.enable = true;
-  # languages.python.lsp.enable = false; # manually installed via pkgs above
+  languages.zig.enable = true; # 0.15.2
   languages.javascript.enable = true;
   languages.javascript.bun.enable = true;
   languages.javascript.bun.install.enable = true;

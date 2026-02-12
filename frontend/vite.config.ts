@@ -3,13 +3,13 @@ import tailwindcss from "@tailwindcss/vite";
 
 export default defineConfig({
   server: {
-    port: 43210,
+    port: 5173,
     allowedHosts: [
       "truenas-qemu-nixos.snake-dojo.ts.net"
     ],
     proxy: {
       '/api': {
-        target: 'http://localhost:43280',
+        target: 'http://localhost:43210',
         changeOrigin: true,
       },
     },

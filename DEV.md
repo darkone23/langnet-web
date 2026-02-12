@@ -7,10 +7,8 @@ This document provides instructions for developers working on this full-stack we
 This is a fully functional full-stack web application template with the following characteristics:
 
 - **Frontend**: Vite + TypeScript + Tailwind CSS + DaisyUI + HTMX + Alpine.js
-- **Backend**: Starlette (ASGI) + Route lists + Jinja2 + Granian
-- **CLI**: Click + Rich + sh libraries
-- **Data Processing**: Polars + DuckDB + cattrs
-- **Environment**: Nix/devenv + UV (Python) + Bun (JavaScript)
+- **Backend**: Zig 0.15.x (post-writergate) + zzz HTTP framework + Mustache templates + DuckDB
+- **Environment**: Nix/devenv + Bun (JavaScript)
 - **Task Automation**: Just (justfiles in root, backend, and frontend)
 
 ## Development Environment Setup
@@ -20,6 +18,13 @@ This is a fully functional full-stack web application template with the followin
 - [Nix](https://nixos.org/download/)
 - [devenv](https://devenv.sh/)
 - [Git](https://git-scm.com/)
+- Zig 0.15.x (automatically managed by devenv)
+
+**Important Note:** This project uses Zig 0.15.x with the "post-writergate" standard library. The writergate was a major change to Zig's standard library that improved async I/O and error handling patterns. If you're coming from older Zig versions, be aware of:
+- Updated async/await patterns (using `zig 0.15.x` async model)
+- Changes to std.http and related networking modules
+- Updated error union conventions
+- New allocator APIs
 
 ### Environment Activation
 
@@ -65,6 +70,7 @@ cd frontend && bun run build && cd ..
 │   │   ├── main.ts            # Application entry point
 │   │   └── tailwind.css       # Tailwind + DaisyUI imports
 │   ├── public/                # Static assets
+│   ├── dist/                  # Build output (served by Zig in production)
 │   ├── index.html             # HTML entry point
 │   ├── vite.config.ts         # Vite configuration
 │   ├── tsconfig.json          # TypeScript configuration
@@ -72,21 +78,17 @@ cd frontend && bun run build && cd ..
 │   ├── bun.lock               # Bun lockfile
 │   └── justfile               # Frontend commands
 ├── backend/                    # Backend application
-│   ├── boilerplate_app/
-│   │   ├── web/
-│   │   │   ├── __init__.py    # Starlette app factory
-│   │   │   ├── routes.py      # API Route definitions
-│   │   │   └── templates/     # Jinja2 templates (HTMX partials)
-│   │   │       ├── index.html      # Reference file (unused)
-│   │   │       └── main_content.html  # HTMX partial template
-│   │   ├── __init__.py
-│   │   ├── cli.py             # CLI application
-│   │   ├── asgi.py            # ASGI entry point
-│   │   ├── cattrs_example.py  # Cattrs examples
-│   │   ├── duckdb_example.py  # DuckDB examples
-│   │   └── polars_example.py  # Polars examples
-│   ├── pyproject.toml         # Python package config
-│   ├── uv.lock                # UV lockfile
+│   ├── src/
+│   │   ├── main.zig           # Application entry point
+│   │   ├── routes.zig         # API Route definitions
+│   │   ├── config.zig         # Configuration management
+│   │   ├── template.zig       # Template cache and rendering
+│   │   └── root.zig           # Module exports
+│   ├── templates/             # Mustache templates (HTMX partials)
+│   │   ├── main_content.html  # Main page content
+│   │   └── hello_htmx.html    # HTMX partial template
+│   ├── build.zig              # Zig build configuration
+│   ├── build.zig.zon          # Zig dependencies
 │   └── justfile               # Backend commands
 ├── devenv.nix                  # Nix development environment
 ├── devenv.yaml                 # Devenv inputs
@@ -105,14 +107,15 @@ cd frontend && bun run build && cd ..
 
 ```bash
 # Start both frontend and backend (recommended)
-just dev
+just dev-frontend
+just dev-backend
 
 # Or start them separately in different terminals:
-just dev-frontend    # Vite at http://localhost:43210
-just dev-backend     # Starlette at http://localhost:43280
+just dev-frontend    # Vite at http://localhost:5173
+just dev-backend     # Zig at http://localhost:43210
 ```
 
-The Vite dev server proxies all `/api/*` requests to Starlette, so you can develop the full stack from `http://localhost:43210`.
+The Vite dev server proxies all `/api/*` requests to Zig, so you can develop the full stack from `http://localhost:5173`.
 
 ### Making Frontend Changes
 
@@ -131,37 +134,44 @@ bun run preview  # Preview production build
 
 ### Making Backend Changes
 
-1. Edit files in `backend/boilerplate_app/`
-2. Starlette dev server auto-reloads on file changes
-3. Test API endpoints at `http://localhost:43280/api/*`
+1. Edit files in `backend/src/`
+2. Zig dev server auto-reloads on file changes (restart required)
+3. Test API endpoints at `http://localhost:43210/api/*`
 
 ```bash
 # Backend-specific commands (from backend/ directory)
-just dev         # Start Starlette dev server
-just run-server  # Start Granian production server
-just run-cli     # Run CLI application
+just dev         # Start Zig dev server
+just run-server  # Start Zig production server
+just test        # Run Zig tests
 ```
 
 ### Adding API Endpoints
 
-Edit `backend/boilerplate_app/web/routes.py`:
+Edit `backend/src/routes.zig`:
 
-```python
-from starlette.responses import JSONResponse, Response
-from starlette.routing import Route
+```zig
+const std = @import("std");
 
-async def my_endpoint(request):
-    return JSONResponse({'data': 'value'})
+fn myEndpoint(ctx: *const Context, _: void) !Respond {
+    return ctx.response.apply(.{
+        .status = .OK,
+        .mime = http.Mime.JSON,
+        .body = "{\"data\":\"value\"}",
+    });
+}
 
-async def my_htmx_endpoint(request):
-    """Return HTML partial for HTMX"""
-    html = '<div class="alert alert-info">Hello from HTMX!</div>'
-    return Response(content=html, media_type='text/html')
+fn myHtmxEndpoint(ctx: *const Context, _: void) !Respond {
+    // Return HTML partial for HTMX
+    return ctx.response.apply(.{
+        .status = .OK,
+        .mime = http.Mime.HTML,
+        .body = "<div class=\"alert alert-info\">Hello from HTMX!</div>",
+    });
+}
 
-api_routes = [
-    Route('/my-endpoint', my_endpoint, methods=['GET']),
-    Route('/my-htmx-endpoint', my_htmx_endpoint, methods=['GET']),
-]
+// Add to createRouter function:
+Route.init("/my-endpoint").get({}, myEndpoint).layer(),
+Route.init("/my-htmx-endpoint").get({}, myHtmxEndpoint).layer(),
 ```
 
 ### Adding Frontend Interactivity
@@ -191,10 +201,11 @@ Use Alpine.js for client-side interactivity:
 just build
 
 # The built files are output to frontend/dist/
-# Starlette serves these automatically in production mode
+# Zig serves these automatically in production mode
 
 # Start production server
-just run
+cd backend
+just run-server
 ```
 
 ## Code Architecture
@@ -206,27 +217,25 @@ The project has two different HTML files serving distinct purposes:
 | File | Purpose | When Used |
 |------|---------|-----------|
 | `frontend/index.html` | Vite dev server entry point | Development only |
-| `backend/boilerplate_app/web/templates/index.html` | Reference/template (unused in production) | Documentation only |
+| `backend/templates/main_content.html` | Main content template | HTMX partial rendering |
 
 **Development Flow:**
-1. Vite dev server serves `frontend/index.html` at port 43210
+1. Vite dev server serves `frontend/index.html` at port 5173
 2. Vite injects the script tag (`<script type="module" src="/src/main.ts"></script>`) for hot module replacement
-3. Tailwind CSS v4 scans both frontend source (`@source ".."`) and backend templates (`@source "../../backend/boilerplate_app/web/templates"`)
-4. Backend templates (`main_content.html`) are served as HTMX partials via `/api/main-content`
+3. Tailwind CSS v4 scans both frontend source (`@source ".."`) and backend templates (`@source "../../backend/templates"`)
+4. Backend templates (`main_content.html`, `hello_htmx.html`) are served as HTMX partials via `/api/main-content` and `/api/hello-htmx`
 
 **Production Flow:**
 1. `bun run build` generates optimized files to `frontend/dist/`
-2. Starlette serves the built `index.html` from `frontend/dist/` (not the backend template)
-3. Starlette routes `/assets/*` and `/vite.svg` to static files
-4. HTMX endpoints render Jinja2 templates as HTML partials
+2. Zig serves the built `index.html` from `frontend/dist/` at port 43210
+3. Zig routes `/assets/*` and `/vite.svg` to static files
+4. HTMX endpoints render Mustache templates as HTML partials
 
 **Important Notes:**
-- The backend `templates/index.html` is **NOT** served by Starlette in production
-- Tailwind scans backend templates to generate CSS for classes used in Jinja2/HTMX responses
-- Backend `templates/main_content.html` is rendered dynamically by the `/api/main-content` route
+- Backend templates are rendered dynamically by route handlers (e.g., `/api/main-content`)
 - Only the built `frontend/dist/index.html` is served to users in production
-
-**Note:** The backend `templates/index.html` file is a reference/template and is not used in the application. It can be considered for removal or kept as documentation of the expected HTML structure.
+- Tailwind scans backend templates to generate CSS for classes used in Mustache/HTMX responses
+- HTMX partials return HTML snippets that replace/update page sections
 
 ### Frontend Components
 
@@ -241,39 +250,48 @@ The project has two different HTML files serving distinct purposes:
 
 | File | Purpose |
 |------|---------|
-| `web/__init__.py` | Starlette app factory, static file serving |
-| `web/routes.py` | API Route definitions with async handlers |
-| `asgi.py` | ASGI entry point for Granian |
-| `cli.py` | Click-based CLI application |
+| `main.zig` | Application entry point, server initialization |
+| `routes.zig` | API Route definitions with handlers |
+| `config.zig` | Configuration management (env vars) |
+| `template.zig` | Template cache and Mustache rendering |
+| `root.zig` | Module exports |
 
 ### Request Flow
 
 ```
 Development:
-  Browser → Vite (43210) → [serves frontend/index.html]
-                          → [injected script tag → main.ts]
-                          → /api/* → Starlette (43280) → [renders Jinja2 templates]
+  Browser → Vite (5173) → [serves frontend/index.html]
+                      → [injected script tag → main.ts]
+                      → /api/* → Zig (43210) → [renders Mustache templates]
 
 Production:
-  Browser → Granian (43280) → [serves frontend/dist/index.html]
-                             → [serves frontend/dist/assets/*]
-                             → /api/* → [renders Jinja2 templates as HTML partials]
+  Browser → Zig (43210) → [serves frontend/dist/index.html]
+                       → [serves frontend/dist/assets/*]
+                       → /api/* → [renders Mustache templates as HTML partials]
 
 Tailwind v4:
-  Scans: frontend/src/*, frontend/index.html, backend/boilerplate_app/web/templates/*
+  Scans: frontend/src/*, frontend/index.html, backend/templates/*
   Output: optimized CSS bundle
 ```
 
 ## Code Style
 
-### Python
-- Use Starlette Route lists for route organization
-- Return `JSONResponse` for JSON endpoints
-- Return `Response` with HTML content for HTMX endpoints
-- Use async/await for route handlers
-- Use `run_in_threadpool` for blocking operations like DuckDB queries
+### Zig (0.15.x Post-Writergate)
+- Use zzz Route lists for route organization
+- Return JSON strings for JSON endpoints (TODO: use proper JSON library)
+- Return HTML content for HTMX endpoints
+- Use async/await via Tardy runtime
+- Use `!` for error returns
+- Use `defer` for resource cleanup
 - Use type hints for function parameters and returns
-- Follow PEP 8 naming conventions
+- camelCase for functions, PascalCase for types, snake_case for variables
+
+**Zig 0.15.x Notes:**
+- Standard library uses post-writergate I/O model
+- Use `std.http` for HTTP clients (if needed)
+- Allocator APIs follow new conventions
+- Error union syntax: `!T` for error unions
+- Async/await uses updated syntax
 
 ### TypeScript
 - Use strict mode (configured in tsconfig.json)
@@ -291,18 +309,19 @@ Tailwind v4:
 
 ```bash
 # Test API directly
-curl http://localhost:43280/api/hello
-curl http://localhost:43280/api/hello-htmx
-curl http://localhost:43280/api/duckdb-example
-curl http://localhost:43280/api/polars-example
+curl http://localhost:43210/api/hello
+curl http://localhost:43210/api/hello-htmx
+curl http://localhost:43210/api/health
+curl http://localhost:43210/api/duckdb-example
 ```
 
 ### Demo Commands
 
 ```bash
-just demo-duckdb    # DuckDB query examples
-just demo-polars    # Polars DataFrame examples
-just demo-cattrs    # Cattrs serialization examples
+cd backend
+just test-server    # Run server integration tests
+just test-db        # Run DuckDB endpoint tests
+just test           # Run Zig tests
 ```
 
 ## Troubleshooting
@@ -333,20 +352,21 @@ bun run dev    # Try again
 # Ensure you're in devenv shell
 devenv shell
 
-# Use uv run for Python execution
-uv run python -c "import starlette; print('OK')"
+# Verify Zig is available
+zig version
 ```
 
-**Starlette won't start:**
+**Zig won't start:**
 ```bash
 cd backend
 just dev    # Check error output
 ```
 
 **API proxy not working:**
-- Ensure Starlette is running on port 43280
+- Ensure Zig is running on port 43210
 - Check Vite proxy config in `vite.config.ts`
 - Look for CORS errors in browser console
+- Verify frontend is at http://localhost:5173
 
 ### Environment Issues
 
@@ -358,27 +378,48 @@ devenv shell
 
 **Dependencies out of sync:**
 ```bash
-# Python
-cd backend && uv sync && cd ..
-
 # JavaScript
 cd frontend && bun install && cd ..
+
+# Zig (fetch dependencies)
+cd backend && zig fetch && cd ..
 ```
 
 ## Ports Reference
 
 | Service | Port | Purpose |
 |---------|------|---------|
-| Vite | 43210 | Frontend dev server |
-| Starlette | 43280 | Backend API server |
+| Vite | 5173 | Frontend dev server |
+| Zig | 43210 | Backend API server |
 
 ## Adding Dependencies
 
-### Python Dependencies
+### Zig Dependencies
 
+Add dependencies to `backend/build.zig.zon`:
+
+```zig
+.{
+    .name = "backend",
+    .version = "0.0.0",
+    .dependencies = .{
+        .mustache = .{
+            .url = "git+https://github.com/batiati/mustache-zig#<version>",
+            .hash = "<hash>",
+        },
+        .zzz = .{
+            .url = "git+https://github.com/tardy-org/zzz#<version>",
+            .hash = "<hash>",
+        },
+        // Add new dependencies here
+    },
+}
+```
+
+Then fetch the dependency:
 ```bash
 cd backend
-uv add <package-name>
+zig fetch
 ```
 
 ### JavaScript Dependencies
@@ -393,8 +434,9 @@ bun add -d <package-name>     # Dev dependency
 
 ### Potential Enhancements
 
-1. **Testing**: Add pytest (backend) and vitest (frontend)
-2. **Authentication**: Add Flask-Login or JWT
-3. **Database**: Add SQLAlchemy or continue with DuckDB
+1. **Testing**: Add zig test (backend) and vitest (frontend)
+2. **Authentication**: Add authentication if/when users are needed
+3. **Database**: Consider DuckDB for production or add PostgreSQL
 4. **Deployment**: Add Docker configuration
 5. **CI/CD**: Add GitHub Actions workflow
+6. **JSON Library**: Add proper JSON serialization library for backend
